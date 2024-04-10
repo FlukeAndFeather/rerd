@@ -37,8 +37,10 @@ r <- cegr_create_template(
   crs = california_current_crs,
   res_km = 10
 )
+# Read one ROMS value
 cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
           -125, 37, as.POSIXct("2020-01-01", "UTC"), r)
+# Read multiple ROMS values
 cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
           seq(-125, -130, length.out = 10),
           seq(37, 40, length.out = 10),
@@ -46,6 +48,8 @@ cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
               as.POSIXct("2020-12-01", "UTC"),
               length.out = 10),
               r)
+# Read from a CMEMS dataset and convert temperature to celsius
 cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
-          -125, 37, as.POSIXct("2020-01-01", "UTC"), r)
+          -125, 37, as.POSIXct("2020-01-01", "UTC"), r) \%>\%
+  cmems_to_celsius()
 }

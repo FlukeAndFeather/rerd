@@ -24,8 +24,10 @@
 #'   crs = california_current_crs,
 #'   res_km = 10
 #' )
+#' # Read one ROMS value
 #' cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
 #'           -125, 37, as.POSIXct("2020-01-01", "UTC"), r)
+#' # Read multiple ROMS values
 #' cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
 #'           seq(-125, -130, length.out = 10),
 #'           seq(37, 40, length.out = 10),
@@ -33,8 +35,10 @@
 #'               as.POSIXct("2020-12-01", "UTC"),
 #'               length.out = 10),
 #'               r)
+#' # Read from a CMEMS dataset and convert temperature to celsius
 #' cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
-#'           -125, 37, as.POSIXct("2020-01-01", "UTC"), r)
+#'           -125, 37, as.POSIXct("2020-01-01", "UTC"), r) %>%
+#'   cmems_to_celsius()
 cegr_read <- function(cegr_var, lon, lat, t, rast_template, depth = NA) {
   stopifnot(is_path_valid(cegr_var))
 
@@ -114,44 +118,20 @@ read_satellite <- function(cegr_var, lon, lat, t, rast_template, depth) {
       stop(stringr::str_glue("No directory found at {ym_dir}. Are you sure you're on the Annex computer?"))
     }
     ymd_path <- dir(ym_dir, one_day$t_ymd, full.name = TRUE)
-    ymd_nc <- ncdf4::nc_open(ymd_path)
-
-    # Figure out dimensions
-    nc_dims <- names(ymd_nc$dim)
-    nc_lon <- ncdf4::ncvar_get(ymd_nc, nc_dims[grep("lon", nc_dims)])
-    nc_lat <- ncdf4::ncvar_get(ymd_nc, nc_dims[grep("lat", nc_dims)])
-    if (!is.na(depth))
-      nc_depth <- ncdf4::ncvar_get(ymd_nc, nc_dims[grep("depth", nc_dims)])
-    nc_time <- ncdf4::ncvar_get(ymd_nc, nc_dims[grep("time", nc_dims)])
-    ncdf4::nc_close(ymd_nc)
-
-    # Locate x,y,z,t indices
-    x_idx <- find_nearest(.rows$lon, nc_lon)
-    y_idx <- find_nearest(.rows$lat, nc_lat)
-    if (!is.na(.rows$depth))
-      z_idx <- find_nearest(.rows$depth, nc_depth)
-
+    # Project raster
+    ymd_rast <- copernicus_to_rast(ymd_path, var_id)
+    ymd_proj <- terra::project(ymd_rast, rast_template)
     # Extract data
-    # Order of dimensions may change between datasets
-    dim_order <- if (!is.na(depth)) {
-      order(sapply(c("lon", "lat", "depth"), \(x) grep(x, nc_dims)))
-    } else {
-      order(sapply(c("lon", "lat"), \(x) grep(x, nc_dims)))
-    }
-    nc_data <- ncdf4::ncvar_get(ymd_nc, var_id)
-    result <- if (!is.na(depth)) {
-      purrr::pmap_dbl(list(x_idx, y_idx, z_idx)[dim_order],
-                      \(a, b, c) nc_data[a, b, c])
-    } else {
-      purrr::pmap_dbl(list(x_idx, y_idx)[dim_order],
-                      \(a, b) nc_data[a, b])
-    }
-    one_day$result <- result
+    result <- cbind(one_day$lon, one_day$lat) %>%
+      terra::vect(crs = "EPSG:4326") %>%
+      terra::extract(ymd_proj, .)
+    # Return result
+    one_day$result <- result[[var_id]]
     one_day
   })
 
-  # Combine daily requests
-  all_results <- purrr::list_rbind(daily_results) %>%
+  # Combine daily requests and return result
+  purrr::list_rbind(daily_results) %>%
     dplyr::arrange(i) %>%
     dplyr::pull(result)
 }

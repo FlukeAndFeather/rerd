@@ -39,3 +39,11 @@ cegr_create_template <- function(lon, lat, crs, res_km) {
   terra::res(result) <- res
   result
 }
+
+copernicus_to_rast <- function(copernicus_path, var_id) {
+  coper_rast <- suppressWarnings(terra::rast(copernicus_path))
+  terra::set.crs(coper_rast, "EPSG:4326")
+  terra::set.ext(coper_rast, c(-180, 180, -90, 90))
+  coper_rast <- terra::flip(coper_rast, "vertical")
+  coper_rast[[var_id]]
+}
