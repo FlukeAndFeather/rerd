@@ -136,7 +136,7 @@ read_satellite <- function(cegr_var, lon, lat, t, rast_template, focal_stat, foc
       terra::vect(crs = "EPSG:4326") %>%
       terra::extract(ymd_proj, .)
     # Return result
-    one_day$result <- result[[var_id]]
+    one_day$result <- result[[2]] # 1 is ID, 2 is result
     one_day
   })
 
