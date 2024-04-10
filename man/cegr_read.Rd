@@ -2,14 +2,12 @@
 % Please edit documentation in R/read.R
 \name{cegr_read}
 \alias{cegr_read}
-\title{Read data CEG-approved data sources}
+\title{Read CEG-approved data sources}
 \usage{
-cegr_read(cegr_var, res_deg, lon, lat, t, depth = NA)
+cegr_read(cegr_var, lon, lat, t, rast_template, depth = NA)
 }
 \arguments{
 \item{cegr_var}{\verb{[chr(1)]} Variable id, see \code{cegr_datasets}}
-
-\item{res_deg}{\verb{[dbl(1)]} Resolution of data extraction, in degrees.}
 
 \item{lon}{\verb{[dbl(n)]} Longitude}
 
@@ -17,23 +15,41 @@ cegr_read(cegr_var, res_deg, lon, lat, t, depth = NA)
 
 \item{t}{\verb{[dbl(n)]} Time}
 
-\item{depth}{\verb{[dbl(n)]} Depth}
+\item{rast_template}{\verb{[terra::SpatRaster]} Template raster (see
+\verb{\link{cegr_create_template}})}
+
+\item{depth}{\verb{[dbl(n)]} Depth (defaults to NA)}
 }
 \value{
 \verb{[dbl(n)]}
 }
 \description{
-Read data CEG-approved data sources
+Note that you \strong{must} provide a template raster for extraction. This may
+seem like an extraneous step, but it's the only way to ensure data extraction
+and model prediction happen on the same grid.
 }
 \examples{
+# Raster template
+california_current_crs <- "+proj=laea +lat_0=36 +lon_0=-122 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+r <- cegr_create_template(
+  lon = c(-127, -117),
+  lat = c(32, 40),
+  crs = california_current_crs,
+  res_km = 10
+)
+# Read one ROMS value
 cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
-          -125, 37, as.POSIXct("2020-01-01", "UTC"))
+          -125, 37, as.POSIXct("2020-01-01", "UTC"), r)
+# Read multiple ROMS values
 cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
           seq(-125, -130, length.out = 10),
           seq(37, 40, length.out = 10),
           seq(as.POSIXct("2020-01-01", "UTC"),
               as.POSIXct("2020-12-01", "UTC"),
-              length.out = 10))
+              length.out = 10),
+              r)
+# Read from a CMEMS dataset and convert temperature to celsius
 cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
-          -125, 37, as.POSIXct("2020-01-01", "UTC"))
+          -125, 37, as.POSIXct("2020-01-01", "UTC"), r) \%>\%
+  cmems_to_celsius()
 }
