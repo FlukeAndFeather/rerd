@@ -4,21 +4,23 @@
 \alias{cegr_read}
 \title{Read data CEG-approved data sources}
 \usage{
-cegr_read(cegr_var, lon, lat, t, depth = NA)
+cegr_read(cegr_var, res_deg, lon, lat, t, depth = NA)
 }
 \arguments{
-\item{cegr_var}{\link{chr(1)} Variable id, see \code{cegr_datasets}}
+\item{cegr_var}{\verb{[chr(1)]} Variable id, see \code{cegr_datasets}}
 
-\item{lon}{\link{dbl(n)} Longitude}
+\item{res_deg}{\verb{[dbl(1)]} Resolution of data extraction, in degrees.}
 
-\item{lat}{\link{dbl(n)} Latitude}
+\item{lon}{\verb{[dbl(n)]} Longitude}
 
-\item{t}{\link{dbl(n)} Time}
+\item{lat}{\verb{[dbl(n)]} Latitude}
 
-\item{depth}{\link{dbl(n)} Depth}
+\item{t}{\verb{[dbl(n)]} Time}
+
+\item{depth}{\verb{[dbl(n)]} Depth}
 }
 \value{
-\link{dbl(n)}
+\verb{[dbl(n)]}
 }
 \description{
 Read data CEG-approved data sources

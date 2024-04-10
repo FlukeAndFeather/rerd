@@ -1,12 +1,13 @@
 #' Read data CEG-approved data sources
 #'
-#' @param cegr_var [chr(1)] Variable id, see `cegr_datasets`
-#' @param lon [dbl(n)] Longitude
-#' @param lat [dbl(n)] Latitude
-#' @param t [dbl(n)] Time
-#' @param depth [dbl(n)] Depth
+#' @param cegr_var `[chr(1)]` Variable id, see `cegr_datasets`
+#' @param res_deg `[dbl(1)]` Resolution of data extraction, in degrees.
+#' @param lon `[dbl(n)]` Longitude
+#' @param lat `[dbl(n)]` Latitude
+#' @param t `[dbl(n)]` Time
+#' @param depth `[dbl(n)]` Depth
 #'
-#' @return [dbl(n)]
+#' @return `[dbl(n)]`
 #' @export
 #'
 #' @examples
@@ -20,7 +21,7 @@
 #'               length.out = 10))
 #' cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
 #'           -125, 37, as.POSIXct("2020-01-01", "UTC"))
-cegr_read <- function(cegr_var, lon, lat, t, depth = NA) {
+cegr_read <- function(cegr_var, res_deg, lon, lat, t, depth = NA) {
   stopifnot(is_path_valid(cegr_var))
 
   read_fun <- if (grepl("ROMS", cegr_var)) {
@@ -29,10 +30,10 @@ cegr_read <- function(cegr_var, lon, lat, t, depth = NA) {
     read_satellite
   }
 
-  read_fun(cegr_var, lon, lat, t, depth)
+  read_fun(cegr_var, template, lon, lat, t, depth)
 }
 
-read_roms <- function(cegr_var, lon, lat, t, depth) {
+read_roms <- function(cegr_var, lon, lat, t, depth, res_deg) {
   # Locate ROMS variable file
   var_split <- strsplit(cegr_var, ":")[[1]]
   roms_var <- var_split[3]
@@ -46,18 +47,27 @@ read_roms <- function(cegr_var, lon, lat, t, depth) {
   roms_time <- ncdf4::ncvar_get(roms_nc, "time") %>%
     as.POSIXct(tz = "UTC", origin = "2011-1-2")
   roms_data <- ncdf4::ncvar_get(roms_nc, names(roms_nc$var)[3])
+  ncdf4::nc_close(roms_nc)
+  roms_rast <- terra::rast(
+    nrows = length(roms_lon),
+    ncols = length(roms_lat),
+    nlyrs = length(roms_time),
+    xmin = min(roms_lon),
+    xmax = max(roms_lon),
+    ymin = min(roms_lat),
+    ymax = max(roms_lat),
+    crs = "EPSG:4326",
+    vals = roms_data
+  )
+  # Resample to desired resolution
+  template_rast <- roms_rast
+  terra::res(template_rast) <- res_deg
+  roms_rast <- terra::resample(roms_rast, template_rast)
 
   # Extract data
-  roms_idx <- list(
-    lon_idx = find_nearest(lon, roms_lon),
-    lat_idx = find_nearest(lat, roms_lat),
-    time_idx = find_nearest(time, roms_time)
-  )
-  result <- purrr::pmap_dbl(roms_idx, \(lon_idx, lat_idx, time_idx) roms_data[lon_idx, lat_idx, time_idx])
-
-  # Wrap up
-  ncdf4::nc_close(roms_nc)
-  result
+  time_idx <- find_nearest(time, roms_time)
+  loc_vect <- terra::vect(cbind(lon, lat), crs = "EPSG:4326")
+  terra::extract(roms_rast, loc_vect, layer = time_idx)$value
 }
 
 read_satellite <- function(cegr_var, lon, lat, t, depth) {
