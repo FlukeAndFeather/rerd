@@ -2,43 +2,38 @@
 % Please edit documentation in R/read.R
 \name{cegr_read}
 \alias{cegr_read}
-\title{Read an environmental variable}
+\title{Read data CEG-approved data sources}
 \usage{
-cegr_read(cegr_var, lon, lat, t, if_outside = c("warn", "error", "none"))
+cegr_read(cegr_var, res_deg, lon, lat, t, depth = NA)
 }
 \arguments{
-\item{cegr_var}{\verb{[chr(1)]} The variable id. Use \code{cegr_vars} to look up
-variable ids by product, name, and time scale, e.g.,
-\code{cegr_vars$`Biogeochemistry Ocean Model`$o2$historical}. See
-\link{cegr_vars}.}
+\item{cegr_var}{\verb{[chr(1)]} Variable id, see \code{cegr_datasets}}
 
-\item{lon}{\verb{[dbl(n)]} Longitudes of points to extract, in (-180, 180). Must
-be the same length as \code{lat} and \code{t}. See \link{cegr_convert_lon}.}
+\item{res_deg}{\verb{[dbl(1)]} Resolution of data extraction, in degrees.}
 
-\item{lat}{\verb{[dbl(n)]} Latitudes of points to extract. Must be the same length
-as \code{lon} and \code{t}.}
+\item{lon}{\verb{[dbl(n)]} Longitude}
 
-\item{t}{\verb{[POSIX(n)]} Times of points to extract. Must be the same length as
-\code{lon} and \code{lat}.}
+\item{lat}{\verb{[dbl(n)]} Latitude}
 
-\item{if_outside}{\verb{[chr(1)]} What to do if \code{lon}, \code{lat}, or \code{t} fall outside
-the spatiotemporal domain of the product. If "warn" (default),
-\code{cegr_read()} returns NA for those points and throws a warning. "none" does
-the same, but without the warning. "error" throws an error.}
+\item{t}{\verb{[dbl(n)]} Time}
+
+\item{depth}{\verb{[dbl(n)]} Depth}
 }
 \value{
-\verb{[dbl(n)]} The values of the environmental variable extracted from
-the points (\code{lon}, \code{lat}) at the points in time closest to \code{t}.
+\verb{[dbl(n)]}
 }
 \description{
-Read an environmental variable
+Read data CEG-approved data sources
 }
 \examples{
-\dontrun{
-set.seed(1234)
-x <- cumsum(c(-125, runif(9, -0.2, 0.2)))
-y <- cumsum(c(33, runif(9, -0.2, 0.2)))
-t <- as.POSIXct("2020-04-01", tz = "UTC") + (0:9) * 3600 * 24 * 7
-cegr_read(cegr_vars$`Biogeochemistry Ocean Model`$o2$historical, x, y, t)
-}
+cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
+          -125, 37, as.POSIXct("2020-01-01", "UTC"))
+cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
+          seq(-125, -130, length.out = 10),
+          seq(37, 40, length.out = 10),
+          seq(as.POSIXct("2020-01-01", "UTC"),
+              as.POSIXct("2020-12-01", "UTC"),
+              length.out = 10))
+cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
+          -125, 37, as.POSIXct("2020-01-01", "UTC"))
 }

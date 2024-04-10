@@ -3,9 +3,8 @@ Package: cegR
 Title: Internal data access package for the CEG Heritage Harbor office
 Version: 0.0.9999
 Authors@R: 
-    person("Max", "Czapanskiy", , "maxczapanskiy@gmail.com", role = c("aut", "cre"),
-           comment = c("ORCID-ID" = "0000-0002-6302-905X"))
-Maintainer: The package maintainer <yourself@somewhere.net>
+    person("Max", "Czapanskiy", , "max.czapanskiy@noaa.gov", role = c("aut", "cre"))
+Maintainer: Max Czapanskiy <max.czapanskiy@noaa.gov>
 Description: cegR is a unified interface for environmental data extraction
     tasks. It is designed for the CEG Heritage Harbor office for their
     marine species distribution modeling projects.
@@ -17,6 +16,7 @@ Depends:
 Imports: 
     config,
     magrittr,
+    ncdf4,
     purrr,
     stringr,
     terra,
@@ -27,5 +27,5 @@ Suggests:
     usethis
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)

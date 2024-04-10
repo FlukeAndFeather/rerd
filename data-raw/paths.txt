@@ -1,0 +1,12 @@
+supercomputer:ROMS=/Users/EcoCast/Dropbox/WCNRT/wcnrt_daily
+annex:satellite:Sea surface temperature:nrt=/Volumes/PROBOI/Data/GlobalData/CMEMS_SST_NEW/Historical 1981-2018
+annex:satellite:Sea surface temperature:historical=/Volumes/PROBOI/Data/GlobalData/CMEMS_SST_NEW/NRT 2007-2020
+annex:satellite:Altimetry:nrt=/Volumes/PROBOI/Data/GlobalData/CMEMS_SSH_uv
+annex:satellite:Altimetry:historical=/Volumes/PROBOI/Data/GlobalData/CMEMS_SSH_uv/NRT product
+annex:satellite:Ocean physics model:nrt=/Volumes/PROBOI/Data/GlobalData/CMEMS_MLD_New/Historical
+annex:satellite:Ocean physics model:historical=/Volumes/PROBOI/Data/GlobalData/CMEMS_MLD_New/NRT_New
+annex:satellite:Biogeochemistry ocean model:nrt=/Volumes/PROBOI/Data/GlobalData/CMEMS_Oxygen/Historical/global-reanalysis-bio-001-029-daily
+annex:satellite:Biogeochemistry ocean model:historical=/Volumes/PROBOI/Data/GlobalData/CMEMS_Oxygen/NRT
+annex:satellite:Chla:nrt=/Volumes/PROBOI/Data/GlobalData/CMEMS_Chla_4km_daily/CMEMS_Chla_4km_Daily_Interpolated_Historical
+annex:satellite:Chla:historical=/Volumes/PROBOI/Data/GlobalData/CMEMS_Chla_4km_daily/cmems_obs-oc_glo_bgc-plankton_my_l4-gapfree-multi-4km_P1D
+annex:static:Bathymetry=/Volumes/PROBOI/Data/GlobalData/CMEMS_Chla_4km_daily/CMEMS_Chla_4km_Daily_Interpolated_NRT
