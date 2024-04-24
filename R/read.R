@@ -9,7 +9,11 @@
 #' @param lat `[dbl(n)]` Latitude
 #' @param t `[dbl(n)]` Time
 #' @param rast_template `[terra::SpatRaster]` Template raster (see
-#'   `\link{cegr_create_template}`)
+#'   \link{cegr_create_template})
+#' @param focal_stat `function` Optional focal statistic function to use e.g.,
+#'   mean. Defaults to NULL. See \link[terra]{focal}.
+#' @param focal_win `[int(1)]` Optional focal statistic function window size.
+#'   Defaults to NULL. See \link[terra]{focal}.
 #' @param depth `[dbl(n)]` Depth (defaults to NA)
 #'
 #' @return `[dbl(n)]`
@@ -34,7 +38,7 @@
 #'           seq(as.POSIXct("2020-01-01", "UTC"),
 #'               as.POSIXct("2020-12-01", "UTC"),
 #'               length.out = 10),
-#'               r)
+#'           r)
 #' # Read from a CMEMS dataset and convert temperature to celsius
 #' cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
 #'           -125, 37, as.POSIXct("2020-01-01", "UTC"), r) %>%
