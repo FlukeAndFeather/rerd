@@ -31,8 +31,8 @@ cegr_datasets <- list(
         historical = c("adt", "sla", "ugos", "ugosa", "vgos", "vgosa")
       ),
       `Ocean physics model` = list(
-        nrt = c("mld", "salinity", "temperature", "ice thickness and concentration", "ssh", "uo", "vo"),
-        historical = c("mld", "salinity", "temperature", "ice thickness and concentration", "ssh", "uo", "vo")
+        nrt = c("mlotst", "so", "thetao", "sithick", "siconc", "zos", "uo", "vo"),
+        historical = c("mlotst", "so", "thetao", "sithick", "siconc", "zos", "uo", "vo")
       ),
       `Biogeochemistry ocean model` = list(
         nrt = c("o2", "pp", "chl", "fe", "nitrate", "ph", "po4", "si", "co2"),
