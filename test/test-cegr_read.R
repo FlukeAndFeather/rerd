@@ -19,3 +19,6 @@ for (d in annex_datasets) {
    error = function(e) message(sprintf("FAIL: %s", e$message))
   )
 }
+
+foo <- cegr_read(cegr_datasets$annex$satellite$`Ocean physics model`$nrt$salinity,
+                 -125, 37, as.POSIXct("2020-01-01", "UTC"), r)

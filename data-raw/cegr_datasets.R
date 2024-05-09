@@ -10,7 +10,7 @@
 list_as_paths <- function(l, path = NULL) {
   if (is.character(l[[1]])) {
     result <- as.list(paste(path, l, sep = ":"))
-    names(result) <- paste(path, names(l), sep = ":")
+    names(result) <- names(l)
     result
   } else {
     paths <- if(is.null(path)) {
