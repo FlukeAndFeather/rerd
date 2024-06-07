@@ -1,11 +1,17 @@
 ## code to prepare `cegr_datasets` dataset goes here
 
 # Recursive function to make terminal elements of a hierarchical list into paths
-# to themselves (e.g. foo$bar = "a" becomes foo$bar$a = foo:bar:a)
+# to their values. Necessary because display names of variables may not match
+# internal variable names.
+# E.g.,
+# cegr_datasets$annex$satellite$`Ocean physics model`$nrt$mld = "mlotst"
+# becomes:
+# cegr_datasets$annex$satellite$`Ocean physics model`$nrt$mld = "annex:satellite:Ocean physics model:nrt:mlotst"
 list_as_paths <- function(l, path = NULL) {
-  if (is.null(names(l))) {
-    paths <- as.list(paste(path, l, sep = ":"))
-    magrittr::set_names(paths, l)
+  if (is.character(l[[1]])) {
+    result <- as.list(paste(path, l, sep = ":"))
+    names(result) <- names(l)
+    result
   } else {
     paths <- if(is.null(path)) {
       names(l)
@@ -18,33 +24,100 @@ list_as_paths <- function(l, path = NULL) {
 
 cegr_datasets <- list(
   supercomputer = list(
-    ROMS = c("bbv", "curl", "ild_05", "ssh", "sst", "su", "sustr", "sv", "svstr")
+    ROMS = list(
+      bbv = "bbv",
+      curl = "curl",
+      ild_05 = "ild_05",
+      ssh = "ssh",
+      sst = "sst",
+      su = "su",
+      sustr = "sustr",
+      sv = "sv",
+      svstr = "svstr")
   ),
   annex = list(
     satellite = list(
       `Sea surface temperature` = list(
-        nrt = c("analysed_sst", "sea_ice_fraction"),
-        historical = c("analysed_sst", "sea_ice_fraction")
+        nrt = list(
+          sst = "analysed_sst",
+          sea_ice = "sea_ice_fraction"
+        ),
+        historical = list(
+          sst = "analysed_sst",
+          sea_ice = "sea_ice_fraction"
+        )
       ),
       Altimetry = list(
-        nrt = c("adt", "sla", "ugos", "ugosa", "vgos", "vgosa"),
-        historical = c("adt", "sla", "ugos", "ugosa", "vgos", "vgosa")
+        nrt = list(
+          adt = "adt",
+          sla = "sla",
+          ugos = "ugos",
+          ugosa = "ugosa",
+          vgos = "vgos",
+          vgosa = "vgosa"
+        ),
+        historical = list(
+          adt = "adt",
+          sla = "sla",
+          ugos = "ugos",
+          ugosa = "ugosa",
+          vgos = "vgos",
+          vgosa = "vgosa"
+        )
       ),
       `Ocean physics model` = list(
-        nrt = c("mld", "salinity", "temperature", "ice thickness and concentration", "ssh", "uo", "vo"),
-        historical = c("mld", "salinity", "temperature", "ice thickness and concentration", "ssh", "uo", "vo")
+        nrt = list(
+          mld = "mlotst",
+          salinity = "so",
+          temperature = "thetao",
+          ice_thick = "sithick",
+          ice_conc = "siconc",
+          ssh = "zos",
+          uo = "uo",
+          vo = "vo"
+        ),
+        historical = list(
+          mld = "mlotst",
+          salinity = "so",
+          temperature = "thetao",
+          ice_thick = "sithick",
+          ice_conc = "siconc",
+          ssh = "zos",
+          uo = "uo",
+          vo = "vo"
+        )
       ),
       `Biogeochemistry ocean model` = list(
-        nrt = c("o2", "pp", "chl", "fe", "nitrate", "ph", "po4", "si", "co2"),
-        historical = c("o2", "pp", "chl", "nitrate", "po4", "si")
+        nrt = list(
+          o2 = "o2",
+          pp = "nppv",
+          chl_a = "chl",
+          nitrate = "no3",
+          phosphate = "po4",
+          si = "si"
+        ),
+        historical = list(
+          o2 = "o2",
+          pp = "nppv",
+          chl_a = "chl",
+          nitrate = "no3",
+          phosphate = "po4",
+          si = "si"
+        )
       ),
       Chla = list(
-        nrt = "chla",
-        historical = "chla"
+        nrt = list(
+          chl_a = "CHL",
+          chl_a_err = "CHL_uncertainty"
+        ),
+        historical = list(
+          chl_a = "CHL",
+          chl_a_err = "CHL_error"
+        )
       )
     ),
     static = list(
-      Bathymetry = "bathy"
+      Bathymetry = list(bathy = "altitude")
     )
   )
 ) %>%

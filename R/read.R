@@ -9,7 +9,11 @@
 #' @param lat `[dbl(n)]` Latitude
 #' @param t `[dbl(n)]` Time
 #' @param rast_template `[terra::SpatRaster]` Template raster (see
-#'   `\link{cegr_create_template}`)
+#'   \link{cegr_create_template})
+#' @param focal_stat `function` Optional focal statistic function to use e.g.,
+#'   mean. Defaults to NULL. See \link[terra]{focal}.
+#' @param focal_win `[int(1)]` Optional focal statistic function window size.
+#'   Defaults to NULL. See \link[terra]{focal}.
 #' @param depth `[dbl(n)]` Depth (defaults to NA)
 #'
 #' @return `[dbl(n)]`
@@ -34,12 +38,13 @@
 #'           seq(as.POSIXct("2020-01-01", "UTC"),
 #'               as.POSIXct("2020-12-01", "UTC"),
 #'               length.out = 10),
-#'               r)
+#'           r)
 #' # Read from a CMEMS dataset and convert temperature to celsius
 #' cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
 #'           -125, 37, as.POSIXct("2020-01-01", "UTC"), r) %>%
 #'   cmems_to_celsius()
-cegr_read <- function(cegr_var, lon, lat, t, rast_template, depth = NA) {
+cegr_read <- function(cegr_var, lon, lat, t, rast_template,
+                      focal_stat = NULL, focal_win = NULL, depth = NA) {
   stopifnot(is_path_valid(cegr_var))
 
   read_fun <- if (grepl("ROMS", cegr_var)) {
@@ -48,10 +53,10 @@ cegr_read <- function(cegr_var, lon, lat, t, rast_template, depth = NA) {
     read_satellite
   }
 
-  read_fun(cegr_var, lon, lat, t, rast_template, depth)
+  read_fun(cegr_var, lon, lat, t, rast_template, focal_stat, focal_win, depth)
 }
 
-read_roms <- function(cegr_var, lon, lat, t, rast_template, depth) {
+read_roms <- function(cegr_var, lon, lat, t, rast_template, focal_stat, focal_win, depth) {
   # Locate ROMS variable file
   var_split <- strsplit(cegr_var, ":")[[1]]
   roms_var <- var_split[3]
@@ -82,6 +87,10 @@ read_roms <- function(cegr_var, lon, lat, t, rast_template, depth) {
     vals = roms_data
   ) %>%
     terra::flip(direction = "vertical")
+  # Apply focal statistic, if specified
+  if (!is.null(focal_stat)) {
+    roms_rast <- terra::focal(roms_rast, w = focal_win, fun = focal_stat)
+  }
   # Project and align to raster template
   roms_rast <- terra::project(roms_rast, rast_template,
                               method = "bilinear", align = TRUE)
@@ -93,7 +102,7 @@ read_roms <- function(cegr_var, lon, lat, t, rast_template, depth) {
   terra::extract(roms_rast, loc_vect, layer = time_idx)$value
 }
 
-read_satellite <- function(cegr_var, lon, lat, t, rast_template, depth) {
+read_satellite <- function(cegr_var, lon, lat, t, rast_template, focal_stat, focal_win, depth) {
   # Locate satellite product directory (drop final component of cegr_var, which
   # is the variable within the product)
   product_id <- sub("(.*):[^:]+$", "\\1", cegr_var)
@@ -118,15 +127,20 @@ read_satellite <- function(cegr_var, lon, lat, t, rast_template, depth) {
       stop(stringr::str_glue("No directory found at {ym_dir}. Are you sure you're on the Annex computer?"))
     }
     ymd_path <- dir(ym_dir, one_day$t_ymd, full.name = TRUE)
-    # Project raster
+    # Convert to raster
     ymd_rast <- copernicus_to_rast(ymd_path, var_id)
+    # Apply focal statistic, if specified
+    if (!is.null(focal_stat)) {
+      ymd_rast <- terra::focal(ymd_rast, w = focal_win, fun = focal_stat)
+    }
+    # Project raster
     ymd_proj <- terra::project(ymd_rast, rast_template)
     # Extract data
     result <- cbind(one_day$lon, one_day$lat) %>%
       terra::vect(crs = "EPSG:4326") %>%
       terra::extract(ymd_proj, .)
     # Return result
-    one_day$result <- result[[var_id]]
+    one_day$result <- result[[2]] # 1 is ID, 2 is result
     one_day
   })
 

@@ -40,6 +40,32 @@ cegr_create_template <- function(lon, lat, crs, res_km) {
   result
 }
 
+#' Create a raster template
+#'
+#' Create a common grid in lon/lat across variables for data extraction and
+#' prediction.
+#'
+#' @param lon `[dbl(2)]` Longitudinal extent, xmin and xmax.
+#' @param lat `[dbl(2)]` Latitudinal extent, ymin and ymax.
+#' @param res_deg `[dbl(1)]` Resolution of raster template in degrees
+#'
+#' @return `[terra::SpatRaster]`
+#' @export
+#'
+#' @examples
+#' cegr_create_template(
+#'   lon = c(-127, -117),
+#'   lat = c(32, 40),
+#'   res_deg = 0.25
+#' )
+cegr_create_lonlat_template <- function(lon, lat, res_deg) {
+  terra::rast(
+    terra::ext(lon[1], lon[2], lat[1], lat[2]),
+    crs = "EPSG:4326",
+    res = res_deg
+  )
+}
+
 copernicus_to_rast <- function(copernicus_path, var_id) {
   coper_rast <- suppressWarnings(terra::rast(copernicus_path))
   terra::set.crs(coper_rast, "EPSG:4326")

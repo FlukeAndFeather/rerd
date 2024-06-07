@@ -4,7 +4,16 @@
 \alias{cegr_read}
 \title{Read CEG-approved data sources}
 \usage{
-cegr_read(cegr_var, lon, lat, t, rast_template, depth = NA)
+cegr_read(
+  cegr_var,
+  lon,
+  lat,
+  t,
+  rast_template,
+  focal_stat = NULL,
+  focal_win = NULL,
+  depth = NA
+)
 }
 \arguments{
 \item{cegr_var}{\verb{[chr(1)]} Variable id, see \code{cegr_datasets}}
@@ -16,7 +25,13 @@ cegr_read(cegr_var, lon, lat, t, rast_template, depth = NA)
 \item{t}{\verb{[dbl(n)]} Time}
 
 \item{rast_template}{\verb{[terra::SpatRaster]} Template raster (see
-\verb{\link{cegr_create_template}})}
+\link{cegr_create_template})}
+
+\item{focal_stat}{\code{function} Optional focal statistic function to use e.g.,
+mean. Defaults to NULL. See \link[terra]{focal}.}
+
+\item{focal_win}{\verb{[int(1)]} Optional focal statistic function window size.
+Defaults to NULL. See \link[terra]{focal}.}
 
 \item{depth}{\verb{[dbl(n)]} Depth (defaults to NA)}
 }
@@ -47,7 +62,7 @@ cegr_read(cegr_datasets$supercomputer$ROMS$bbv,
           seq(as.POSIXct("2020-01-01", "UTC"),
               as.POSIXct("2020-12-01", "UTC"),
               length.out = 10),
-              r)
+          r)
 # Read from a CMEMS dataset and convert temperature to celsius
 cegr_read(cegr_datasets$annex$satellite$`Sea surface temperature`$nrt$analysed_sst,
           -125, 37, as.POSIXct("2020-01-01", "UTC"), r) \%>\%
